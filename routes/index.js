@@ -303,7 +303,6 @@ router.post('/updateProfile', function (req, res) {
     var idDetails = {member_id: mymemberId};
     database.query(updation, [update_details, idDetails], function (err) {
         if (err) {
-            console.log(err);
             res.json({status: 0, msg: err});
         }
         else {
@@ -362,7 +361,6 @@ router.get('/getUserList', function (req, res) {
 router.post('/getUser', function (req, res) {
     var database = req.mysql;
     var memberId = req.body.id;
-    console.log(memberId);
     var getDetails = 'SELECT * FROM all_members WHERE member_id =?';
     database.query(getDetails, [memberId], function (err, rows) {
         if (err) {
@@ -397,13 +395,12 @@ router.post('/deleteUser', function (req, res) {
                     res.json({status: 0, msg: error});
                 }
                 else {
-                    if (result.length > 0) {
-                        var record = result;
-                        res.json({status: 1, details: result});
-                    }
-                    else {
-                        res.json({status: 0, msg: 'Record not found'});
-                    }
+//                    if (result.length > 0) {
+                    res.json({status: 1});
+//                    }
+//                    else {
+//                        res.json({status: 0, msg: ' No Record to Delete'});
+//                    }
                 }
             });
         }
@@ -425,7 +422,6 @@ router.post('/updateUser', function (req, res) {
     var idDetails = {member_id: memberId};
     database.query(updateUser, [updateDetails, idDetails], function (err, rows) {
         if (err) {
-            console.log(err);
             res.json({status: 0, msg: err});
         }
         else {
