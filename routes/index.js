@@ -6,7 +6,6 @@ var sizeOf = require('image-size');
 var fs = require('fs');
 var util = require('util');
 
-
 var storage = multer.diskStorage({
     destination: function (req, file, cb) {
         cb(null, 'uploads/');
@@ -441,9 +440,9 @@ router.post('/updateUser', function (req, res) {
         }
     });
 });
-//-END--API for Delete User, INFORMATION DELETED FROM ALL_PROFILES and ALL_MEMBERS TABLE-----------
+//-END--API for Delete User, INFORMATION DELETED FROM ALL_PROFILES and ALL_MEMBERS TABLE------------------
 
-//-START--API for Fetch ProjectList, INFORMATION SAVED IN All_PROJECTS TABLE-----------
+//-START--API for Fetch ProjectList, INFORMATION SAVED IN All_PROJECTS TABLE------------------------------
 router.get('/getProjectList', function (req, res) {
     var database = req.mysql;
     var getProjects = 'SELECT * FROM all_projects';
@@ -462,9 +461,9 @@ router.get('/getProjectList', function (req, res) {
         }
     });
 });
-//-END--API for Fetch ProjectList, INFORMATION SAVED IN All_PROJECTS TABLE-----------
+//-END--API for Fetch ProjectList, INFORMATION SAVED IN All_PROJECTS TABLE--------------------------------
 
-//-START--API for Save Project, INFORMATION SAVED IN All_PROJECTS TABLE-----------
+//-START--API for Save Project, INFORMATION SAVED IN All_PROJECTS TABLE-----------------------------------
 router.all('/saveProject', upload.single('file'), function (req, res, next) {
     var database = req.mysql;
     var projectName = req.body.name;
@@ -486,7 +485,6 @@ router.all('/saveProject', upload.single('file'), function (req, res, next) {
                         res.json({status: 0, msg: err});
                     }
                     else {
-//                        res.json({status: 1, msg: 'Project Uploaded.'});
                         if (req.body.type === 'project') {
                             existFile = 'uploads/' + req.file.filename;
                             var directory = 'uploads/projects/' + req.body.id;
@@ -591,123 +589,235 @@ router.all('/saveProject', upload.single('file'), function (req, res, next) {
                 });
             }
             else {
-                var updateProject = 'UPDATE all_projects SET ? WHERE ?';
-                var updateDetails = {project_name: projectName, member_id: userId, project_description: intro};
-                var idDetails = {member_id: userId};
-                database.query(updateProject, [updateDetails, idDetails], function (err, rows) {
-                    if (err) {
-                        res.json({status: 0, msg: err});
-                    }
-                    else {
-//                        res.json({status: 1, msg: 'Project Details Updated.'});
-                        if (req.body.type === 'project') {
-                            existFile = 'uploads/' + req.file.filename;
-                            var directory = 'uploads/projects/' + req.body.id;
-                            var writeFile = 'uploads/projects/' + req.body.id + '/' + req.file.filename;
-                            if (!fs.existsSync(directory)) {
-                                fs.mkdirSync(directory);
-                                fs.exists(directory, function (exists) {
-                                    if (exists) {
-                                        var oldFile = fs.createReadStream(existFile);
-                                        var newFile = fs.createWriteStream(writeFile);
-                                        util.pump(oldFile, newFile, function () {
-                                            fs.unlinkSync(existFile);
-                                            fs.rename(writeFile, directory + '/' + req.body.id + path.extname(req.file.originalname), function (err) {
-                                                if (err) {
-                                                    res.json({status: 0, msg: err});
-                                                }
-                                                else {
-                                                    res.json({status: 1});
-                                                }
+                if (rows[0].hod_approval === 'pending') {
+                    var updateProject = 'UPDATE all_projects SET ? WHERE ?';
+                    var updateDetails = {project_name: projectName, member_id: userId, project_description: intro};
+                    var idDetails = {member_id: userId};
+                    database.query(updateProject, [updateDetails, idDetails], function (err, rows) {
+                        if (err) {
+                            res.json({status: 0, msg: err});
+                        }
+                        else {
+                            if (req.body.type === 'project') {
+                                existFile = 'uploads/' + req.file.filename;
+                                var directory = 'uploads/projects/' + req.body.id;
+                                var writeFile = 'uploads/projects/' + req.body.id + '/' + req.file.filename;
+                                if (!fs.existsSync(directory)) {
+                                    fs.mkdirSync(directory);
+                                    fs.exists(directory, function (exists) {
+                                        if (exists) {
+                                            var oldFile = fs.createReadStream(existFile);
+                                            var newFile = fs.createWriteStream(writeFile);
+                                            util.pump(oldFile, newFile, function () {
+                                                fs.unlinkSync(existFile);
+                                                fs.rename(writeFile, directory + '/' + req.body.id + path.extname(req.file.originalname), function (err) {
+                                                    if (err) {
+                                                        res.json({status: 0, msg: err});
+                                                    }
+                                                    else {
+                                                        res.json({status: 1});
+                                                    }
+                                                });
                                             });
-                                        });
-                                    }
-                                    else {
-                                        res.json({status: 0, msg: 'File is not uploaded'});
-                                    }
-                                });
+                                        }
+                                        else {
+                                            res.json({status: 0, msg: 'File is not uploaded'});
+                                        }
+                                    });
+                                }
+                                else {
+                                    fs.exists(directory, function (exists) {
+                                        if (exists) {
+                                            var oldFile = fs.createReadStream(existFile);
+                                            var newFile = fs.createWriteStream(writeFile);
+                                            util.pump(oldFile, newFile, function () {
+                                                fs.unlinkSync(existFile);
+                                                fs.rename(writeFile, directory + '/' + req.body.id + path.extname(req.file.originalname), function (err) {
+                                                    if (err) {
+                                                        res.json({status: 0, msg: err});
+                                                    }
+                                                    else {
+                                                        res.json({status: 1});
+                                                    }
+                                                });
+                                            });
+                                        }
+                                        else {
+                                            res.json({status: 0, msg: 'File is not uploaded'});
+                                        }
+                                    });
+                                }
                             }
-                            else {
-                                fs.exists(directory, function (exists) {
-                                    if (exists) {
-                                        var oldFile = fs.createReadStream(existFile);
-                                        var newFile = fs.createWriteStream(writeFile);
-                                        util.pump(oldFile, newFile, function () {
-                                            fs.unlinkSync(existFile);
-                                            fs.rename(writeFile, directory + '/' + req.body.id + path.extname(req.file.originalname), function (err) {
-                                                if (err) {
-                                                    res.json({status: 0, msg: err});
-                                                }
-                                                else {
-                                                    res.json({status: 1});
-                                                }
+                            else if (req.body.type === 'synopsys') {
+                                existFile = 'uploads/' + req.file.filename;
+                                var directory = 'uploads/synopsys/' + req.body.id;
+                                var writeFile = 'uploads/synopsys/' + req.body.id + '/' + req.file.filename;
+                                if (!fs.existsSync(directory)) {
+                                    fs.mkdirSync(directory);
+                                    fs.exists(directory, function (exists) {
+                                        if (exists) {
+                                            var oldFile = fs.createReadStream(existFile);
+                                            var newFile = fs.createWriteStream(writeFile);
+                                            util.pump(oldFile, newFile, function () {
+                                                fs.unlinkSync(existFile);
+                                                fs.rename(writeFile, directory + '/' + req.body.id + path.extname(req.file.originalname), function (err) {
+                                                    if (err) {
+                                                        res.json({status: 0, msg: err});
+                                                    }
+                                                    else {
+                                                        res.json({status: 1});
+                                                    }
+                                                });
                                             });
-                                        });
-                                    }
-                                    else {
-                                        res.json({status: 0, msg: 'File is not uploaded'});
-                                    }
-                                });
+                                        }
+                                        else {
+                                            res.json({status: 0, msg: 'File is not uploaded'});
+                                        }
+                                    });
+                                }
+                                else {
+                                    fs.exists(directory, function (exists) {
+                                        if (exists) {
+                                            var oldFile = fs.createReadStream(existFile);
+                                            var newFile = fs.createWriteStream(writeFile);
+                                            util.pump(oldFile, newFile, function () {
+                                                fs.unlinkSync(existFile);
+                                                fs.rename(writeFile, directory + '/' + req.body.id + path.extname(req.file.originalname), function (err) {
+                                                    if (err) {
+                                                        res.json({status: 0, msg: err});
+                                                    }
+                                                    else {
+                                                        res.json({status: 1});
+                                                    }
+                                                });
+                                            });
+                                        }
+                                        else {
+                                            res.json({status: 0, msg: 'File is not uploaded'});
+                                        }
+                                    });
+                                }
                             }
                         }
-                        else if (req.body.type === 'synopsys') {
-                            existFile = 'uploads/' + req.file.filename;
-                            var directory = 'uploads/synopsys/' + req.body.id;
-                            var writeFile = 'uploads/synopsys/' + req.body.id + '/' + req.file.filename;
-                            if (!fs.existsSync(directory)) {
-                                fs.mkdirSync(directory);
-                                fs.exists(directory, function (exists) {
-                                    if (exists) {
-                                        var oldFile = fs.createReadStream(existFile);
-                                        var newFile = fs.createWriteStream(writeFile);
-                                        util.pump(oldFile, newFile, function () {
-                                            fs.unlinkSync(existFile);
-                                            fs.rename(writeFile, directory + '/' + req.body.id + path.extname(req.file.originalname), function (err) {
-                                                if (err) {
-                                                    res.json({status: 0, msg: err});
-                                                }
-                                                else {
-                                                    res.json({status: 1});
-                                                }
+                    });
+                }
+                else {
+                    var updateProject = 'UPDATE all_projects SET ? WHERE ?';
+                    var updateDetails = {member_id: userId, project_description: intro};
+                    var idDetails = {member_id: userId};
+                    database.query(updateProject, [updateDetails, idDetails], function (err, rows) {
+                        if (err) {
+                            res.json({status: 0, msg: err});
+                        }
+                        else {
+                            if (req.body.type === 'project') {
+                                existFile = 'uploads/' + req.file.filename;
+                                var directory = 'uploads/projects/' + req.body.id;
+                                var writeFile = 'uploads/projects/' + req.body.id + '/' + req.file.filename;
+                                if (!fs.existsSync(directory)) {
+                                    fs.mkdirSync(directory);
+                                    fs.exists(directory, function (exists) {
+                                        if (exists) {
+                                            var oldFile = fs.createReadStream(existFile);
+                                            var newFile = fs.createWriteStream(writeFile);
+                                            util.pump(oldFile, newFile, function () {
+                                                fs.unlinkSync(existFile);
+                                                fs.rename(writeFile, directory + '/' + req.body.id + path.extname(req.file.originalname), function (err) {
+                                                    if (err) {
+                                                        res.json({status: 0, msg: err});
+                                                    }
+                                                    else {
+                                                        res.json({status: 1});
+                                                    }
+                                                });
                                             });
-                                        });
-                                    }
-                                    else {
-                                        res.json({status: 0, msg: 'File is not uploaded'});
-                                    }
-                                });
+                                        }
+                                        else {
+                                            res.json({status: 0, msg: 'File is not uploaded'});
+                                        }
+                                    });
+                                }
+                                else {
+                                    fs.exists(directory, function (exists) {
+                                        if (exists) {
+                                            var oldFile = fs.createReadStream(existFile);
+                                            var newFile = fs.createWriteStream(writeFile);
+                                            util.pump(oldFile, newFile, function () {
+                                                fs.unlinkSync(existFile);
+                                                fs.rename(writeFile, directory + '/' + req.body.id + path.extname(req.file.originalname), function (err) {
+                                                    if (err) {
+                                                        res.json({status: 0, msg: err});
+                                                    }
+                                                    else {
+                                                        res.json({status: 1});
+                                                    }
+                                                });
+                                            });
+                                        }
+                                        else {
+                                            res.json({status: 0, msg: 'File is not uploaded'});
+                                        }
+                                    });
+                                }
                             }
-                            else {
-                                fs.exists(directory, function (exists) {
-                                    if (exists) {
-                                        var oldFile = fs.createReadStream(existFile);
-                                        var newFile = fs.createWriteStream(writeFile);
-                                        util.pump(oldFile, newFile, function () {
-                                            fs.unlinkSync(existFile);
-                                            fs.rename(writeFile, directory + '/' + req.body.id + path.extname(req.file.originalname), function (err) {
-                                                if (err) {
-                                                    res.json({status: 0, msg: err});
-                                                }
-                                                else {
-                                                    res.json({status: 1});
-                                                }
+                            else if (req.body.type === 'synopsys') {
+                                existFile = 'uploads/' + req.file.filename;
+                                var directory = 'uploads/synopsys/' + req.body.id;
+                                var writeFile = 'uploads/synopsys/' + req.body.id + '/' + req.file.filename;
+                                if (!fs.existsSync(directory)) {
+                                    fs.mkdirSync(directory);
+                                    fs.exists(directory, function (exists) {
+                                        if (exists) {
+                                            var oldFile = fs.createReadStream(existFile);
+                                            var newFile = fs.createWriteStream(writeFile);
+                                            util.pump(oldFile, newFile, function () {
+                                                fs.unlinkSync(existFile);
+                                                fs.rename(writeFile, directory + '/' + req.body.id + path.extname(req.file.originalname), function (err) {
+                                                    if (err) {
+                                                        res.json({status: 0, msg: err});
+                                                    }
+                                                    else {
+                                                        res.json({status: 1});
+                                                    }
+                                                });
                                             });
-                                        });
-                                    }
-                                    else {
-                                        res.json({status: 0, msg: 'File is not uploaded'});
-                                    }
-                                });
+                                        }
+                                        else {
+                                            res.json({status: 0, msg: 'File is not uploaded'});
+                                        }
+                                    });
+                                }
+                                else {
+                                    fs.exists(directory, function (exists) {
+                                        if (exists) {
+                                            var oldFile = fs.createReadStream(existFile);
+                                            var newFile = fs.createWriteStream(writeFile);
+                                            util.pump(oldFile, newFile, function () {
+                                                fs.unlinkSync(existFile);
+                                                fs.rename(writeFile, directory + '/' + req.body.id + path.extname(req.file.originalname), function (err) {
+                                                    if (err) {
+                                                        res.json({status: 0, msg: err});
+                                                    }
+                                                    else {
+                                                        res.json({status: 1});
+                                                    }
+                                                });
+                                            });
+                                        }
+                                        else {
+                                            res.json({status: 0, msg: 'File is not uploaded'});
+                                        }
+                                    });
+                                }
                             }
                         }
-                    }
-                });
+                    });
+                }
             }
         }
     });
 });
-//-END--API for Save Project, INFORMATION SAVED IN All_PROJECTS TABLE-----------
-
+//-END--API for Save Project, INFORMATION SAVED IN All_PROJECTS TABLE-------------------------------------
 
 //-START--API for Fetch Project Of a Perticular Person, INFORMATION SAVED IN All_PROJECTS TABLE-----------
 router.get('/getProjectList/:userId', function (req, res) {
